@@ -390,6 +390,35 @@ void CObjectsShader::ReleaseObjects()
 	}
 }
 
+void CObjectsShader::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255); //256의 배수
+	m_pd3dcbGameObjects = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes * m_nObjects, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbGameObjects->Map(0, NULL, (void**)&m_pcbMappedGameObjects);
+}
+
+void CObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		CB_GAMEOBJECT_INFO* pbMappedcbGameObject = (CB_GAMEOBJECT_INFO*)((UINT8*)m_pcbMappedGameObjects + (j * ncbElementBytes));
+		XMStoreFloat4x4(&pbMappedcbGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(&m_ppObjects[j]->m_xmf4x4World)));
+	}
+}
+
+void CObjectsShader::ReleaseShaderVariables()
+{
+	if (m_pd3dcbGameObjects)
+	{
+		m_pd3dcbGameObjects->Unmap(0, NULL);
+		m_pd3dcbGameObjects->Release();
+	}
+
+	// CStandardShader::ReleaseShaderVariables(); 어차피 아무것도 없음
+}
+
 void CObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	for (int i = 0; i < m_nObjects; i++) {
@@ -426,7 +455,8 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 
 void CObjectsShader::ReleaseUploadBuffers()
 {
-	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+	if (m_ppObjects)
+		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
@@ -739,4 +769,92 @@ D3D12_SHADER_BYTECODE CTexturedShader::CreatePixelShader()
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 
+CBillboardObjectsShader::CBillboardObjectsShader()
+{
+	m_pRawFormatImage = new CRawFormatImage(L"Image/ObjectsMap.raw", 257, 257, true);
+
+	int nGrassObjects = 0, nFlowerObjects = 0, nBlacks = 0, nOthers = 0, nTreeObjects[3] = { 0, 0, 0 };
+	for (int z = 2; z <= 254; z++)
+	{
+		for (int x = 2; x <= 254; x++)
+		{
+			BYTE nPixel = m_pRawFormatImage->GetRawImagePixel(x, z);
+			switch (nPixel)
+			{
+			case 102: nGrassObjects++; break;
+			case 128: nGrassObjects++; break;
+			case 153: nFlowerObjects++; break;
+			case 179: nFlowerObjects++; break;
+			case 204: nTreeObjects[0]++; break;
+			case 225: nTreeObjects[1]++; break;
+			case 255: nTreeObjects[2]++; break;
+			case 0: nBlacks++; break;
+			default: nOthers++; break;
+			}
+		}
+	}
+	m_nObjects = nGrassObjects + nFlowerObjects + nTreeObjects[0] + nTreeObjects[1] + nTreeObjects[2];
+}
+
+CBillboardObjectsShader::~CBillboardObjectsShader()
+{
+}
+
+D3D12_RASTERIZER_DESC CBillboardObjectsShader::CreateRasterizerState()
+{
+	D3D12_RASTERIZER_DESC d3dRasterizerDesc;
+	::ZeroMemory(&d3dRasterizerDesc, sizeof(D3D12_RASTERIZER_DESC));
+	d3dRasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
+	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
+	d3dRasterizerDesc.DepthBias = 0;
+	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
+	d3dRasterizerDesc.SlopeScaledDepthBias = 0.0f;
+	d3dRasterizerDesc.DepthClipEnable = TRUE;
+	d3dRasterizerDesc.MultisampleEnable = FALSE;
+	d3dRasterizerDesc.AntialiasedLineEnable = FALSE;
+	d3dRasterizerDesc.ForcedSampleCount = 0;
+	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
+
+	return(d3dRasterizerDesc);
+}
+
+void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+}
+
+void CBillboardObjectsShader::ReleaseObjects()
+{
+	if (m_pRawFormatImage) delete m_pRawFormatImage;
+
+	CObjectsShader::ReleaseObjects();
+}
+
+void CBillboardObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+{
+	XMFLOAT3 xmf3CameraPosition = pCamera->GetPosition();
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j]) m_ppObjects[j]->LookAt(xmf3CameraPosition, XMFLOAT3(0.0f, 1.0f, 0.0f));
+	}
+
+	CObjectsShader::Render(pd3dCommandList, pCamera);
+}
+
+D3D12_SHADER_BYTECODE CBillboardObjectsShader::CreateVertexShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillboard", "vs_5_1", &m_pd3dVertexShaderBlob));
+}
+
+D3D12_SHADER_BYTECODE CBillboardObjectsShader::CreatePixelShader()
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillboard", "ps_5_1", &m_pd3dPixelShaderBlob));
+}
+
+void CBillboardObjectsShader::ReleaseUploadBuffers()
+{
+	CObjectsShader::ReleaseUploadBuffers();
+}
