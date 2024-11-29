@@ -1249,13 +1249,15 @@ void CSkyIsland::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 CGrassObject::CGrassObject() : CGameObject(1)
 {
-	m_nMeshes = 1;
-	m_ppMeshes = NULL;
-	if (m_nMeshes > 0)
-	{
-		m_ppMeshes = new CMesh * [m_nMeshes];
-		for (int i = 0; i < m_nMeshes; i++)	m_ppMeshes[i] = NULL;
-	}
+	//m_nMeshes = 1;
+	//m_ppMeshes = NULL;
+	//if (m_nMeshes > 0)
+	//{
+	//	m_ppMeshes = new CMesh * [m_nMeshes];
+	//	for (int i = 0; i < m_nMeshes; i++)	m_ppMeshes[i] = NULL;
+	//}
+
+	 m_pMesh = NULL;
 }
 
 CGrassObject::~CGrassObject()

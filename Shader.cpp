@@ -370,10 +370,8 @@ void CObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComman
 		m_ppObjects[i]->SetPosition(uid(dre), y(dre), uid(dre));
 		m_ppObjects[i]->SetMovingDirection(XMFLOAT3(dir(dre), 0, dir(dre)));
 		m_ppObjects[i]->SetMovingSpeed(10.f);
-		//m_ppObjects[i]->SetScale(10, 10, 10);
 		m_ppObjects[i]->SetActive(true);
 		m_ppObjects[i]->PrepareAnimate();
-		//m_ppObjects[i] = pObject;
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -948,7 +946,7 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			{
 				pBillboardObject = new CGrassObject();
 
-				pBillboardObject->SetMesh(0, pMesh);
+				pBillboardObject->SetMesh(pMesh);
 				pBillboardObject->SetMaterial(0, pMaterial);
 
 				float xPosition = x * xmf3Scale.x;
