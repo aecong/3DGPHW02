@@ -874,13 +874,13 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle = CScene::GetGPUCbvDescriptorNextHandle();
 	CScene::CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
 
-	CScene::CreateShaderResourceViews(pd3dDevice, ppGrassTextures[0], 0,  7);
-	CScene::CreateShaderResourceViews(pd3dDevice, ppGrassTextures[1], 0,  7);
-	CScene::CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[0], 0, 7);
-	CScene::CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[1], 0, 7);
-	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[0], 0,   7);
-	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[1], 0,   7);
-	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[2], 0,   7);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppGrassTextures[0], 0,  5);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppGrassTextures[1], 0,  5);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[0], 0, 5);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[1], 0, 5);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[0], 0,   5);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[1], 0,   5);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[2], 0,   5);
 
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
 

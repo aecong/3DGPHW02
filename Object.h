@@ -429,3 +429,17 @@ public:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+class CGrassObject : public CGameObject
+{
+public:
+	CGrassObject();
+	virtual ~CGrassObject();
+
+	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
+
+	float m_fRotationAngle = 0.0f;
+	float m_fRotationDelta = 1.0f;
+};
