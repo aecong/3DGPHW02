@@ -20,6 +20,12 @@ cbuffer cbGameObjectInfo : register(b2)
 	uint		gnTexturesMask : packoffset(c8);
 };
 
+cbuffer cbFrameworkInfo : register(b3)
+{
+    float gfCurrentTime : packoffset(c0.x);
+    float gfElapsedTime : packoffset(c0.y);
+};
+
 #include "Light.hlsl"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -231,8 +237,50 @@ float4 PSTextureToScreen(VS_TEXTURED_OUTPUT input) : SV_TARGET
 	
     return (cColor);
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
+#define _WITH_BILLBOARD_ANIMATION
+
+VS_TEXTURED_OUTPUT VSBillboard(VS_TEXTURED_INPUT input)
+{
+    VS_TEXTURED_OUTPUT output;
+
+#ifdef _WITH_CONSTANT_BUFFER_SYNTAX
+	output.position = mul(mul(mul(float4(input.position, 1.0f), gcbGameObjectInfo.mtxWorld), gcbCameraInfo.mtxView), gcbCameraInfo.mtxProjection);
+#else
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+#endif
+
+#ifdef _WITH_BILLBOARD_ANIMATION
+	if (input.uv.y < 0.7f)
+	{
+		float fShift = 0.0f;
+		int nResidual = ((int)gfCurrentTime % 4);
+		if (nResidual == 1) fShift = -gfElapsedTime * 0.5f;
+		if (nResidual == 3) fShift = +gfElapsedTime * 0.5f;
+		input.uv.x += fShift;
+	}
+#endif
+    output.uv = input.uv;
+
+    return (output);
+}
+
+float4 PSBillboard(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+//    float4 cColor = gtxtTexture.SampleLevel(gssWrap, input.uv, 0);
+	float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    if (cColor.a <= 0.3f)
+        discard; //clip(cColor.a - 0.3f);
+	//	if ((cColor.r >= 1.f) && (cColor.g >= 1.f) && (cColor.b >= 1.f)) discard;
+
+    return (cColor);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
 Texture2D gtxtTerrainBaseTexture : register(t1);
 Texture2D gtxtTerrainDetailTexture : register(t2);
 
