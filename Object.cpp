@@ -327,7 +327,7 @@ CGameObject::~CGameObject()
 			if (m_ppMeshes[i]) m_ppMeshes[i]->Release();
 			m_ppMeshes[i] = NULL;
 		}
-		delete[] m_ppMeshes;
+		delete[] m_ppMeshes;	
 	}
 
 
@@ -1247,8 +1247,9 @@ void CSkyIsland::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 
-CGrassObject::CGrassObject()
+CGrassObject::CGrassObject() : CGameObject(1)
 {
+	m_pMesh = NULL;
 }
 
 CGrassObject::~CGrassObject()
