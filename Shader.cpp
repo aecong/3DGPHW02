@@ -5,8 +5,7 @@
 #include "stdafx.h"
 #include "Shader.h"
 #include "Player.h"
-
-//#include "Scene.h"
+#include "Scene.h"
 
 CShader::CShader()
 {
@@ -824,6 +823,144 @@ D3D12_RASTERIZER_DESC CBillboardObjectsShader::CreateRasterizerState()
 
 void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
+	CTexture* ppGrassTextures[2];
+	ppGrassTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppGrassTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass01.dds", RESOURCE_TEXTURE2D, 0);
+	ppGrassTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppGrassTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Grass02.dds", RESOURCE_TEXTURE2D, 0);
+
+	CTexture* ppFlowerTextures[2];
+	ppFlowerTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppFlowerTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Flower01.dds", RESOURCE_TEXTURE2D, 0);
+	ppFlowerTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppFlowerTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Flower02.dds", RESOURCE_TEXTURE2D, 0);
+
+	CTexture* ppTreeTextures[3];
+	ppTreeTextures[0] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTreeTextures[0]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree01.dds", RESOURCE_TEXTURE2D, 0);
+	ppTreeTextures[1] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTreeTextures[1]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree02.dds", RESOURCE_TEXTURE2D, 0);
+	ppTreeTextures[2] = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+	ppTreeTextures[2]->LoadTextureFromDDSFile(pd3dDevice, pd3dCommandList, L"Image/Tree03.dds", RESOURCE_TEXTURE2D, 0);
+
+	CMaterial* ppGrassMaterials[2];
+	ppGrassMaterials[0] = new CMaterial();
+	ppGrassMaterials[0]->SetTexture(ppGrassTextures[0]);
+	ppGrassMaterials[1] = new CMaterial();
+	ppGrassMaterials[1]->SetTexture(ppGrassTextures[1]);
+
+	CMaterial* ppFlowerMaterials[2];
+	ppFlowerMaterials[0] = new CMaterial();
+	ppFlowerMaterials[0]->SetTexture(ppFlowerTextures[0]);
+	ppFlowerMaterials[1] = new CMaterial();
+	ppFlowerMaterials[1]->SetTexture(ppFlowerTextures[1]);
+
+	CMaterial* ppTreeMaterials[3];
+	ppTreeMaterials[0] = new CMaterial();
+	ppTreeMaterials[0]->SetTexture(ppTreeTextures[0]);
+	ppTreeMaterials[1] = new CMaterial();
+	ppTreeMaterials[1]->SetTexture(ppTreeTextures[1]);
+	ppTreeMaterials[2] = new CMaterial();
+	ppTreeMaterials[2]->SetTexture(ppTreeTextures[2]);
+
+	CTexturedRectMesh* pGrassMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 8.0f, 8.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pFlowerMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 8.0f, 16.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pTreeMesh01 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 24.0f, 36.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+	CTexturedRectMesh* pTreeMesh02 = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 16.0f, 46.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	UINT ncbElementBytes = ((sizeof(CB_GAMEOBJECT_INFO) + 255) & ~255);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorNextHandle = CScene::GetGPUCbvDescriptorNextHandle();
+	CScene::CreateConstantBufferViews(pd3dDevice, m_nObjects, m_pd3dcbGameObjects, ncbElementBytes);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, ppGrassTextures[0], 0,  7);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppGrassTextures[1], 0,  7);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[0], 0, 7);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppFlowerTextures[1], 0, 7);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[0], 0,   7);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[1], 0,   7);
+	CScene::CreateShaderResourceViews(pd3dDevice, ppTreeTextures[2], 0,   7);
+
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)pContext;
+
+	int nTerrainWidth = int(pTerrain->GetWidth());
+	int nTerrainLength = int(pTerrain->GetLength());
+
+	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
+
+	m_ppObjects = new CGameObject * [m_nObjects];
+
+	CGrassObject* pBillboardObject = NULL;
+	for (int nObjects = 0, z = 2; z <= 254; z++)
+	{
+		for (int x = 2; x <= 254; x++)
+		{
+			BYTE nPixel = m_pRawFormatImage->GetRawImagePixel(x, z);
+
+			float fyOffset = 0.0f;
+
+			CMaterial* pMaterial = NULL;
+			CMesh* pMesh = NULL;
+
+			switch (nPixel)
+			{
+			case 102:
+				pMesh = pGrassMesh;
+				pMaterial = ppGrassMaterials[0];
+				fyOffset = 8.0f * 0.5f;
+				break;
+			case 128:
+				pMesh = pGrassMesh;
+				pMaterial = ppGrassMaterials[1];
+				fyOffset = 6.0f * 0.5f;
+				break;
+			case 153:
+				pMesh = pFlowerMesh;
+				pMaterial = ppFlowerMaterials[0];
+				fyOffset = 16.0f * 0.5f;
+				break;
+			case 179:
+				pMesh = pFlowerMesh;
+				pMaterial = ppFlowerMaterials[1];
+				fyOffset = 16.0f * 0.5f;
+				break;
+			case 204:
+				pMesh = pTreeMesh01;
+				pMaterial = ppTreeMaterials[0];
+				fyOffset = 33.0f * 0.5f;
+				break;
+			case 225:
+				pMesh = pTreeMesh01;
+				pMaterial = ppTreeMaterials[1];
+				fyOffset = 33.0f * 0.5f;
+				break;
+			case 255:
+				pMesh = pTreeMesh02;
+				pMaterial = ppTreeMaterials[2];
+				fyOffset = 40.0f * 0.5f;
+				break;
+			default:
+				break;
+			}
+
+			if (pMesh && pMaterial)
+			{
+				pBillboardObject = new CGrassObject();
+
+				pBillboardObject->SetMesh(0, pMesh);
+				pBillboardObject->SetMaterial(pMaterial);
+
+				float xPosition = x * xmf3Scale.x;
+				float zPosition = z * xmf3Scale.z;
+				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
+				pBillboardObject->SetPosition(xPosition, fHeight + fyOffset, zPosition);
+				pBillboardObject->SetCbvGPUDescriptorHandlePtr(d3dCbvGPUDescriptorNextHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nObjects));
+
+				m_ppObjects[nObjects++] = pBillboardObject;
+			}
+		}
+	}
 }
 
 void CBillboardObjectsShader::ReleaseObjects()
