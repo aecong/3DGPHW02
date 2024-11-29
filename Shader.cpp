@@ -207,7 +207,7 @@ void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *
 
 void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState)
 {
-	if (m_ppd3dPipelineStates) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
+	if (m_ppd3dPipelineStates[0]) pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[0]);
 	
 	UpdateShaderVariables(pd3dCommandList);
 	
@@ -468,7 +468,7 @@ void CObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		{
 			if (m_ppObjects[j]->m_bActive) {
 				m_ppObjects[j]->Animate(0.16f);
-				m_ppObjects[j]->LookAt(player->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
+				//m_ppObjects[j]->LookAt(player->GetPosition(), XMFLOAT3(0.0f, 1.0f, 0.0f));
 				m_ppObjects[j]->UpdateTransform(NULL);
 				m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 			}
@@ -948,13 +948,13 @@ void CBillboardObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graph
 			{
 				pBillboardObject = new CGrassObject();
 
-				pBillboardObject->SetMesh(pMesh);
+				pBillboardObject->SetMesh(0, pMesh);
 				pBillboardObject->SetMaterial(0, pMaterial);
 
 				float xPosition = x * xmf3Scale.x;
 				float zPosition = z * xmf3Scale.z;
 				float fHeight = pTerrain->GetHeight(xPosition, zPosition);
-				pBillboardObject->SetPosition(xPosition, fHeight + fyOffset, zPosition);
+				pBillboardObject->SetPosition(xPosition - 750.0f, fHeight + fyOffset - 500.0f, zPosition - 750.0f);
 				pBillboardObject->SetCbvGPUDescriptorHandlePtr(d3dCbvGPUDescriptorNextHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nObjects));
 
 				m_ppObjects[nObjects++] = pBillboardObject;
@@ -981,6 +981,21 @@ void CBillboardObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList,
 	CObjectsShader::Render(pd3dCommandList, pCamera);
 }
 
+D3D12_INPUT_LAYOUT_DESC CBillboardObjectsShader::CreateInputLayout()
+{
+	UINT nInputElementDescs = 2;
+	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
+
+	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
+	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
+	d3dInputLayoutDesc.NumElements = nInputElementDescs;
+
+	return(d3dInputLayoutDesc);
+}
+
 D3D12_SHADER_BYTECODE CBillboardObjectsShader::CreateVertexShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSBillboard", "vs_5_1", &m_pd3dVertexShaderBlob));
@@ -990,6 +1005,19 @@ D3D12_SHADER_BYTECODE CBillboardObjectsShader::CreatePixelShader()
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSBillboard", "ps_5_1", &m_pd3dPixelShaderBlob));
 }
+
+//void CBillboardObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+//{
+//	m_nPipelineStates = 1;
+//	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+//
+//	CShader::CreateShader(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+//
+//	if (m_pd3dVertexShaderBlob) m_pd3dVertexShaderBlob->Release();
+//	if (m_pd3dPixelShaderBlob) m_pd3dPixelShaderBlob->Release();
+//
+//	if (m_d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[] m_d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+//}
 
 void CBillboardObjectsShader::ReleaseUploadBuffers()
 {

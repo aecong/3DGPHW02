@@ -198,64 +198,11 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-//	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-//	m_pDescriptorHeap = new CDescriptorHeap();
-//	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 17+50+1+1+1); //SuperCobra(17), Gunship(?), Player:Mi24(1), Skybox(1), Terrain(1)
-//
-//	BuildDefaultLightsAndMaterials();
-//
-//	XMFLOAT3 xmf3Scale = { 1.0f, 1.0f, 1.0f };
-//	//XMFLOAT3 xmf3Scale = { 8.0f, 2.0f, 8.0f };
-//	XMFLOAT4 xmf4Color (0.0f, 1.f, 0.0f, 0.0f);
-//
-//#ifdef _WITH_TERRAIN_PARTITION
-//	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap.raw"), 257, 257, 17, 17, xmf3Scale, xmf4Color);
-//#else
-//	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Image/HeightMap.raw"), 257, 257, 257, 257, xmf3Scale, xmf4Color);
-//#endif
-//
-//	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-//
-//	m_nShaders = 1;
-//	m_ppShaders = new CShader*[m_nShaders];
-//
-//	CObjectsShader *pObjectsShader = new CObjectsShader(); // 다른 비행기들
-//	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-//	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
-//	m_ppShaders[0] = pObjectsShader; 
-//
-//	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 void CScene::ReleaseObjects()
 {
-	//if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
-	//if (m_pDescriptorHeap) delete m_pDescriptorHeap;
-
-	//if (m_ppShaders)
-	//{
-	//	for (int i = 0; i < m_nShaders; i++)
-	//	{
-	//		m_ppShaders[i]->ReleaseShaderVariables();
-	//		m_ppShaders[i]->ReleaseObjects();
-	//		m_ppShaders[i]->Release();
-	//	}
-	//	delete[] m_ppShaders;
-	//}
-
-	//if (m_pTerrain) delete m_pTerrain;
-	//if (m_pSkyBox) delete m_pSkyBox;
-
-	//if (m_ppGameObjects)
-	//{
-	//	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Release();
-	//	delete[] m_ppGameObjects;
-	//}
-
-	//ReleaseShaderVariables();
-
-	//if (m_pLights) delete[] m_pLights;
 }
 
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
@@ -767,7 +714,6 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 		}
 		m_ppGameObjects[i] = pSkyIsland;
 	}
-
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }

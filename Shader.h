@@ -22,6 +22,8 @@ public:
 	CGameObject						**m_ppObjects = 0;
 	int								m_nObjects = 0;
 
+	int GetNumberOfObjects() { return(m_nObjects); }
+
 private:
 	int									m_nReferences = 0;
 
@@ -123,12 +125,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState=0);
 	
-	int GetNumberOfObjects() { return(m_nObjects); }
-
 protected:
-	CGameObject** m_ppObjects = 0;
-	int								m_nObjects = 0;
-
 	ID3D12Resource* m_pd3dcbGameObjects = NULL;
 	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 };
@@ -143,9 +140,13 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void ReleaseObjects();
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+	
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
 
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+	//virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 	virtual void ReleaseUploadBuffers();
 

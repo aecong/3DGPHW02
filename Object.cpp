@@ -387,7 +387,7 @@ void CGameObject::SetMesh(int nIndex, CMesh* pMesh)
 	if (m_ppMeshes)
 	{
 		if (m_ppMeshes[nIndex]) m_ppMeshes[nIndex]->Release();
-		m_ppMeshes[nIndex] = pMesh;
+		m_ppMeshes[nIndex] = pMesh;	
 		if (pMesh) pMesh->AddRef();
 	}
 }
@@ -1249,7 +1249,13 @@ void CSkyIsland::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 CGrassObject::CGrassObject() : CGameObject(1)
 {
-	m_pMesh = NULL;
+	m_nMeshes = 1;
+	m_ppMeshes = NULL;
+	if (m_nMeshes > 0)
+	{
+		m_ppMeshes = new CMesh * [m_nMeshes];
+		for (int i = 0; i < m_nMeshes; i++)	m_ppMeshes[i] = NULL;
+	}
 }
 
 CGrassObject::~CGrassObject()
