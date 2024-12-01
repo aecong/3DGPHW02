@@ -333,24 +333,6 @@ public:
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4 *pxmf4x4Parent = NULL);
 };
 
-
-//class CEnemy : public CGunshipObject
-//{
-//public:
-//	CEnemy(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-//	virtual ~CEnemy();
-//
-//	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);
-//	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
-//
-//	void FireBullet();
-//
-//public:
-//	float						m_fBulletEffectiveRange = 150.0f;
-//	CBullet						*m_ppBullets[10];
-//	int							m_nBullets = 10;
-//
-//};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CSkyBox : public CGameObject
@@ -443,3 +425,7 @@ public:
 	float m_fRotationAngle = 0.0f;
 	float m_fRotationDelta = 1.0f;
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+
