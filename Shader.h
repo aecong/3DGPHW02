@@ -22,8 +22,6 @@ public:
 	CGameObject						**m_ppObjects = 0;
 	int								m_nObjects = 0;
 
-	int GetNumberOfObjects() { return(m_nObjects); }
-
 private:
 	int									m_nReferences = 0;
 
@@ -103,6 +101,9 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 
 	virtual void CreateShader(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
+	
+	ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -125,38 +126,13 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState=0);
 	
+	int GetNumberOfObjects() { return(m_nObjects); }
+
 protected:
-	ID3D12Resource* m_pd3dcbGameObjects = NULL;
-	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
+	//ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	//CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
 };
 
-class CBillboardObjectsShader : public CObjectsShader
-{
-public:
-	CBillboardObjectsShader();
-	virtual ~CBillboardObjectsShader();
-
-	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
-	virtual void ReleaseObjects();
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
-	
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
-
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
-
-	//virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-
-	virtual void ReleaseUploadBuffers();
-
-#ifdef _WITH_BATCH_MATERIAL
-	CMaterial* m_ppGrassMaterials[2] = { NULL, NULL };
-	CMaterial* m_ppFlowerMaterials[2] = { NULL, NULL };
-#endif
-
-	CRawFormatImage* m_pRawFormatImage = NULL;
-};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CTexturedShader : public CShader
@@ -173,6 +149,64 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
 };
 
+class CBilloboardShader : public CTexturedShader
+{
+public:
+	CBilloboardShader();
+	virtual ~CBilloboardShader();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL) {};
+	virtual void AnimateObjects(float fDeltaTime);
+	virtual void ReleaseObjects();
+
+	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables();
+
+	virtual void ReleaseUploadBuffers();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+
+	int GetNumberOfObjects() { return(m_nObjects); }
+
+protected:
+	CGameObject** m_ppObjects = 0;
+	int								m_nObjects = 0;
+
+	ID3D12Resource* m_pd3dcbGameObjects = NULL;
+	CB_GAMEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
+};
+
+class CBillboardObjectsShader : public CBilloboardShader
+{
+public:
+	CBillboardObjectsShader();
+	virtual ~CBillboardObjectsShader();
+
+	virtual D3D12_RASTERIZER_DESC CreateRasterizerState();
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual void ReleaseObjects();
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+
+	//virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout();
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader();
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader();
+
+	//virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+	virtual void ReleaseUploadBuffers();
+
+#ifdef _WITH_BATCH_MATERIAL
+	CMaterial* m_ppGrassMaterials[2] = { NULL, NULL };
+	CMaterial* m_ppFlowerMaterials[2] = { NULL, NULL };
+#endif
+
+	CRawFormatImage* m_pRawFormatImage = NULL;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
 class CPlayerShader : public CShader
 {
 public:

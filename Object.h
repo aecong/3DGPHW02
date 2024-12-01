@@ -435,7 +435,7 @@ public:
 class CGrassObject : public CGameObject
 {
 public:
-	CGrassObject();
+	CGrassObject(CMesh* pMesh, CMaterial* pMaterial);
 	virtual ~CGrassObject();
 
 	virtual void Animate(float fTimeElapsed, XMFLOAT4X4* pxmf4x4Parent = NULL);

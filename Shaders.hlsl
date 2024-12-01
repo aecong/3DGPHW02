@@ -270,10 +270,9 @@ VS_TEXTURED_OUTPUT VSBillboard(VS_TEXTURED_INPUT input)
 float4 PSBillboard(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.SampleLevel(gssWrap, input.uv, 0);
-	//float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+//	float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
     if (cColor.a <= 0.3f)
         discard; //clip(cColor.a - 0.3f);
-	//	if ((cColor.r >= 1.f) && (cColor.g >= 1.f) && (cColor.b >= 1.f)) discard;
 
     return (cColor);
 }

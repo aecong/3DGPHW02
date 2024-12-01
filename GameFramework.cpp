@@ -391,7 +391,7 @@ void CGameFramework::UpdateShaderVariables()
 	m_pcbMappedFrameworkInfo->m_fElapsedTime = m_GameTimer.GetTimeElapsed();
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
-	m_pd3dCommandList->SetGraphicsRootConstantBufferView(7, d3dGpuVirtualAddress);
+	m_pd3dCommandList->SetGraphicsRootConstantBufferView(8, d3dGpuVirtualAddress);
 }
 
 void CGameFramework::ReleaseShaderVariables()
@@ -472,6 +472,9 @@ void CGameFramework::BuildObjects()
 	m_pScene = m_ppScenes[m_nScene];
 	m_pPlayer = m_pScene->GetPlayer();
 	m_pCamera = m_pPlayer->GetCamera();
+
+	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = m_pScene->CreateConstantBufferView(m_pd3dDevice, m_pPlayer->m_pd3dcbPlayer, ((sizeof(CB_PLAYER_INFO) + 255) & ~255));
+	m_pPlayer->SetCbvGPUDescriptorHandle(d3dCbvGPUDescriptorHandle);
 
 	CreateShaderVariables();
 
@@ -623,7 +626,7 @@ void CGameFramework::FrameAdvance()
 
 	m_pd3dCommandList->OMSetRenderTargets(1, &d3dRtvCPUDescriptorHandle, TRUE, &d3dDsvCPUDescriptorHandle);
 	
-	m_pScene->PreRender(m_pd3dCommandList);
+	//m_pScene->PreRender(m_pd3dCommandList);
 
 	UpdateShaderVariables();
 
@@ -632,6 +635,7 @@ void CGameFramework::FrameAdvance()
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
+	//m_pPlayer->m_ppMaterials[0]->m_pShader->Render(m_pd3dCommandList, m_pCamera);
 	if (m_pPlayer) 
 		m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
