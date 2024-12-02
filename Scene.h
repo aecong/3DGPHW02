@@ -98,6 +98,9 @@ public:
 
 	CPlayer								*m_pPlayer = NULL;
 
+	virtual void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera){}
+	virtual void OnPostRenderParticle(){}
+
 public:
 
 	ID3D12RootSignature					*m_pd3dGraphicsRootSignature = NULL;
@@ -170,6 +173,9 @@ public:
 
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	
+	virtual void RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+	virtual void OnPostRenderParticle();
 
 	void BulletByEnemyCollision();
 	void PlayerBySkyIslandCollision(float fTimeElapsed);
@@ -177,6 +183,9 @@ public:
 public:
 	CSkyBox					*m_pSkyBox = NULL;
 	CHeightMapTerrain       *m_pTerrain = NULL;
+
+	CParticleObject**		m_ppParticleObjects = NULL;
+	int						m_nParticleObjects = 0;
 
 	float TimeElapsed = 0.f;
 };

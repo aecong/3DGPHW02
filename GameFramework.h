@@ -11,6 +11,10 @@ struct CB_FRAMEWORK_INFO
 {
 	float					m_fCurrentTime;
 	float					m_fElapsedTime;
+	float					m_fSecondsPerFirework = 1.0f;
+	int						m_nFlareParticlesToEmit = 300;
+	XMFLOAT3				m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
+	int						m_nMaxFlareType2Particles = 150;
 };
 
 class CGameFramework
@@ -90,7 +94,7 @@ private:
 
 	int							m_nScene = 0;
 	CScene						*m_pScene = NULL;
-	int							m_nCurrentScene = 0;
+	int							m_nCurrentScene = 2;
 
 	int							m_nScenes = 0;
 	CScene						**m_ppScenes = NULL;

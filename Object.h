@@ -38,7 +38,7 @@ class CGameObject;
 class CTexture
 {
 public:
-	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters);
+	CTexture(int nTextureResources, UINT nResourceType, int nSamplers, int nRootParameters, bool particle);
 	virtual ~CTexture();
 
 private:

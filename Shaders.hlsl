@@ -344,10 +344,10 @@ float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
 #define FLARE02_PARTICLE_LIFETIME	1.5f
 #define FLARE03_PARTICLE_LIFETIME	2.0f
 
-Texture2D<float4> gtxtParticleTexture : register(t4);
-//Texture1D<float4> gtxtRandom : register(t5);
-Buffer<float4> gRandomBuffer : register(t6);
-Buffer<float4> gRandomSphereBuffer : register(t7);
+Texture2D<float4> gtxtParticleTexture : register(t14);
+//Texture1D<float4> gtxtRandom : register(t11);
+Buffer<float4> gRandomBuffer : register(t15);
+Buffer<float4> gRandomSphereBuffer : register(t16);
 
 SamplerState gMirrorSamplerState : register(s2);
 SamplerState gPointSamplerState : register(s3);
