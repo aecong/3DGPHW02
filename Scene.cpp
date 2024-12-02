@@ -723,8 +723,8 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CBillboardObjectsShader* pBillboardObjectsShader = new CBillboardObjectsShader();
-	int nBillboardObjects = pBillboardObjectsShader->GetNumberOfObjects();
+	m_pBillboardObjectsShader = new CBillboardObjectsShader();
+	int nBillboardObjects = m_pBillboardObjectsShader->GetNumberOfObjects();
 
 	CObjectsShader* pObjectsShader = new CObjectsShader();
 	int nObjects = pObjectsShader->GetNumberOfObjects();
@@ -756,14 +756,12 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
 
-
 	pObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 	pObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);	
 	m_ppShaders[0] = pObjectsShader;
 
-	pBillboardObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
-	pBillboardObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
-	m_ppShaders[1] = pBillboardObjectsShader;
+	m_pBillboardObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	m_pBillboardObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 
 	m_nGameObjects = 10;
 
@@ -806,7 +804,7 @@ void CMainScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
-
+	if (m_pBillboardObjectsShader) delete m_pBillboardObjectsShader;
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 
@@ -826,6 +824,7 @@ void CMainScene::ReleaseUploadBuffers()
 {
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
+	if (m_pBillboardObjectsShader) m_pBillboardObjectsShader->ReleaseUploadBuffers();
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nGameObjects; i++) m_ppGameObjects[i]->ReleaseUploadBuffers();
@@ -854,8 +853,9 @@ void CMainScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
-	if (m_pTerrain) 
-		m_pTerrain->Render(pd3dCommandList, pCamera);
+	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
+
+	if (m_pBillboardObjectsShader) m_pBillboardObjectsShader->Render(pd3dCommandList, pCamera);
 
 	//m_ppGameObjects[0]->m_ppMaterials[0]->m_pShader->Render(pd3dCommandList, pCamera);
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) {

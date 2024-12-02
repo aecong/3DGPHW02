@@ -183,6 +183,7 @@ public:
 public:
 	CSkyBox					*m_pSkyBox = NULL;
 	CHeightMapTerrain       *m_pTerrain = NULL;
+	CBillboardObjectsShader	*m_pBillboardObjectsShader = NULL;
 
 	CParticleObject**		m_ppParticleObjects = NULL;
 	int						m_nParticleObjects = 0;

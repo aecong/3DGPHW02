@@ -382,7 +382,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 void CGameFramework::CreateShaderVariables()
 {
 	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
-	m_pd3dcbFrameworkInfo = ::ParticleCreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbFrameworkInfo = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
 }
@@ -468,7 +468,7 @@ void CGameFramework::BuildObjects()
 		m_ppScenes[2]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 		CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[2]->GetGraphicsRootSignature());
-		pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, -50.0f, -200.0f));
+		pAirplanePlayer->SetPosition(XMFLOAT3(-375.0f, 250.0f, -385.0f));
 		m_ppScenes[2]->SetPlayer(pAirplanePlayer);
 		m_ppScenes[2]->m_ppShaders[0]->SetPlayer(pAirplanePlayer);
 		m_ppScenes[2]->GetPlayer()->ChangeCamera(3, m_GameTimer.GetTimeElapsed());
@@ -641,7 +641,6 @@ void CGameFramework::FrameAdvance()
 #ifdef _WITH_PLAYER_TOP
 	m_pd3dCommandList->ClearDepthStencilView(d3dDsvCPUDescriptorHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 #endif
-	//m_pPlayer->m_ppMaterials[0]->m_pShader->Render(m_pd3dCommandList, m_pCamera);
 	if (m_pPlayer) 
 		m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
