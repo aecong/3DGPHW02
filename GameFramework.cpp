@@ -382,7 +382,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 void CGameFramework::CreateShaderVariables()
 {
 	UINT ncbElementBytes = ((sizeof(CB_FRAMEWORK_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbFrameworkInfo = ::CreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbFrameworkInfo = ::ParticleCreateBufferResource(m_pd3dDevice, m_pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
 	m_pd3dcbFrameworkInfo->Map(0, NULL, (void**)&m_pcbMappedFrameworkInfo);
 }
@@ -468,7 +468,7 @@ void CGameFramework::BuildObjects()
 		m_ppScenes[2]->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 		CAirplanePlayer* pAirplanePlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_ppScenes[2]->GetGraphicsRootSignature());
-		pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		pAirplanePlayer->SetPosition(XMFLOAT3(0.0f, -50.0f, -200.0f));
 		m_ppScenes[2]->SetPlayer(pAirplanePlayer);
 		m_ppScenes[2]->m_ppShaders[0]->SetPlayer(pAirplanePlayer);
 		m_ppScenes[2]->GetPlayer()->ChangeCamera(3, m_GameTimer.GetTimeElapsed());
@@ -567,7 +567,7 @@ void CGameFramework::AnimateObjects()
 	if (m_pPlayer) m_pPlayer->Animate(m_GameTimer.GetTimeElapsed(), NULL);
 }
 
-void CGameFramework::WaitForGpuComplete()
+void CGameFramework::WaitForGpuComplete() // 이새끼;;
 {
 	const UINT64 nFenceValue = ++m_nFenceValues[m_nSwapChainBufferIndex];
 	HRESULT hResult = m_pd3dCommandQueue->Signal(m_pd3dFence, nFenceValue);
@@ -647,19 +647,12 @@ void CGameFramework::FrameAdvance()
 
 	m_pScene->RenderParticle(m_pd3dCommandList, m_pCamera);
 
-	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
-
-	hResult = m_pd3dCommandList->Close();
-
-	ID3D12CommandList* ppd3dCommandLists[] = { m_pd3dCommandList };
-	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
+	::SynchronizeResourceTransition(m_pd3dCommandList, m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	::ExecuteCommandList(m_pd3dCommandList, m_pd3dCommandQueue, m_pd3dFence, ++m_nFenceValues[m_nSwapChainBufferIndex], m_hFenceEvent);
 
 	m_pScene->OnPostRenderParticle();
 
-	WaitForGpuComplete();
+	//WaitForGpuComplete();
 
 #ifdef _WITH_PRESENT_PARAMETERS
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
@@ -682,7 +675,7 @@ void CGameFramework::FrameAdvance()
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+	_stprintf_s(m_pszFrameRate + nLength, 100 - nLength, _T("(%5.1f, %5.1f, %5.1f) Particles = %d"), xmf3Position.x, xmf3Position.y, xmf3Position.z, ::gnCurrentParticles);
 
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }

@@ -149,8 +149,12 @@ public:
 	UINT GetType() { return(m_nType); }
 
 	virtual void ReleaseUploadBuffers();
+	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) { }
+
+	virtual void OnPostRender(int nPipelineState) { }
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -199,6 +203,7 @@ public:
 	ID3D12Resource* m_pd3dDefaultBufferFilledSize = NULL;
 	ID3D12Resource* m_pd3dUploadBufferFilledSize = NULL;
 	UINT64* m_pnUploadBufferFilledSize = NULL;
+
 #ifdef _WITH_QUERY_DATA_SO_STATISTICS
 	ID3D12QueryHeap* m_pd3dSOQueryHeap = NULL;
 	ID3D12Resource* m_pd3dSOQueryBuffer = NULL;
@@ -214,7 +219,7 @@ public:
 
 	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
-	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState) {}
+	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
 
 	virtual void OnPostRender(int nPipelineState);
 };

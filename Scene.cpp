@@ -429,17 +429,17 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	pd3dRootParameters[10].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[10].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[6]; //t4: gtxtParticleTexture
+	pd3dRootParameters[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[6]; //t14: gtxtParticleTexture
 	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[11].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[11].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[7]; //t5: gtxtRandomTexture
+	pd3dRootParameters[11].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[7]; //t15: gtxtRandomTexture
 	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	pd3dRootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[12].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[12].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[8]; //t7: gtxtRandomOnSphereTexture
+	pd3dRootParameters[12].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[8]; //t17: gtxtRandomOnSphereTexture
 	pd3dRootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 
@@ -730,7 +730,7 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	int nObjects = pObjectsShader->GetNumberOfObjects();
 
 	m_pDescriptorHeap = new CDescriptorHeap();
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, nBillboardObjects + nObjects + 30 + 1 + 1 + 1 + 1 + 220, nBillboardObjects + 1  + nObjects + 1 + 1); //SuperCobra(50), Player:Mi24(1), Skybox(1), Terrain(1)
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, nBillboardObjects + nObjects + 30 + 1 + 1 + 1 + 1 , nBillboardObjects + 1  + nObjects + 1 + 1); //SuperCobra(50), Player:Mi24(1), Skybox(1), Terrain(1)
 	
 	m_nParticleObjects = 1;
 	m_ppParticleObjects = new CParticleObject * [m_nParticleObjects];
@@ -753,7 +753,7 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_nShaders = 2;
+	m_nShaders = 1;
 	m_ppShaders = new CShader * [m_nShaders];
 
 
@@ -765,7 +765,7 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	pBillboardObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, m_pTerrain);
 	m_ppShaders[1] = pBillboardObjectsShader;
 
-	m_nGameObjects = 20;
+	m_nGameObjects = 10;
 
 	m_ppGameObjects = new CGameObject * [m_nGameObjects];
 
@@ -783,13 +783,8 @@ void CMainScene::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	};
 
 	for (int i = 0; i < m_nGameObjects; ++i) {
-		CSkyIsland* pSkyIsland = new  CSkyIsland(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, i);
-		if(i % 2 == 0)
-			pSkyIsland->SetPosition(cubePositions[i/2]);
-		else {
-			XMFLOAT3 position = m_ppGameObjects[i - 1]->GetPosition();
-			pSkyIsland->SetPosition(position.x, position.y + 50, position.z);
-		}
+		CSkyIsland* pSkyIsland = new  CSkyIsland(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+		pSkyIsland->SetPosition(cubePositions[i]);
 		m_ppGameObjects[i] = pSkyIsland;
 	}
 
@@ -874,7 +869,7 @@ void CMainScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 void CMainScene::RenderParticle(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	for (int i = 0; i < m_nParticleObjects; i++) m_ppParticleObjects[i]->Render(pd3dCommandList, pCamera);
+	for (int i = 0; i < m_nParticleObjects; i++) if(m_ppParticleObjects[i]) m_ppParticleObjects[i]->Render(pd3dCommandList, pCamera);
 }
 
 void CMainScene::OnPostRenderParticle()

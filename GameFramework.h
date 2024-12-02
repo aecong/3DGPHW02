@@ -104,7 +104,7 @@ private:
 
 	POINT						m_ptOldCursorPos;
 
-	_TCHAR						m_pszFrameRate[70];
+	_TCHAR						m_pszFrameRate[100];
 
 protected:
 	ID3D12Resource* m_pd3dcbFrameworkInfo = NULL;
